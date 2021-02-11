@@ -42,10 +42,16 @@ class ChatBot:
         if colour_in:
             key = colour_in.group(1)
             try:
+                if key in self.hue_bridge.name_scene_dict:
+                    scene_id = self.hue_bridge.name_scene_dict[key]
+                    self.hue_bridge.set_scene(scene_id)
+                    return
+
                 profile = self.hues[key]
                 if isinstance(profile, int):
-                    self.hue_bridge.hue(profile)
-                if isinstance(profile, list):
+#                     self.hue_bridge.hue(profile)
+                    self.hue_bridge.set_group_setting("hue", profile)
+                elif isinstance(profile, list):
                     self.hue_bridge.full_profile(profile)
             except KeyError: 
                 print("What idiot spelt that colour wrong")
@@ -88,7 +94,7 @@ class ChatBot:
             print("Listening...")
             while True:
                 resp = self.sock.recv(2048).decode('utf-8')
-
+                # print(resp)
                 if resp.startswith('PING'):
                     self.sock.send("PONG\n".encode('utf-8'))
 
