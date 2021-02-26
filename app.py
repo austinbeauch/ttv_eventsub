@@ -7,6 +7,8 @@ from flask import Flask, request, Response
 
 import bridge
 from chat import ChatBot
+from ngrok import eventhub_unsubscribe
+
 
 app = Flask(__name__)
 
@@ -34,12 +36,11 @@ def incoming_notification():
         return Response(status=200)
     
     else:
-        return Response(status=502)
+        return Response(status=502)    
 
 try:
     app.run()
-except KeyboardInterrupt:
-    print("Quitting app loop")
-
+finally:
+    eventhub_unsubscribe()
 
 
