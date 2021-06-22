@@ -5,8 +5,8 @@ from flask import Flask, request, Response
 
 import modules
 
-
 app = Flask(__name__)
+event_handler = modules.event_handler.Handler()
 
 @app.route('/', methods=['POST'])
 def incoming_notification():  
@@ -20,7 +20,8 @@ def incoming_notification():
         pprint(request.json)
         event_type =  request.json["subscription"]["type"]
         try:
-            modules.event_handler[event_type](request.json)
+            # modules.event_handler[event_type](request.json)
+            event_handler(request)
         except Exception as ex:
             print(f"Something went wrong: \n {ex}")
         return Response(status=200)
@@ -28,7 +29,9 @@ def incoming_notification():
 
 if __name__ == "__main__":
     try:
-        threading.Thread(target=modules.ngrok_handler.start_ngrok).start()
+        # threading.Thread(target=modules.ngrok_handler.start_ngrok).start()
+        threading.Thread(target=modules.ngrok_handler.start_ngrok, 
+                           args=(event_handler.subscriptions,)).start() 
         app.run()
     finally:
         modules.ngrok_handler.eventhub_unsubscribe()
