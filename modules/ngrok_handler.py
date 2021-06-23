@@ -1,8 +1,6 @@
 import os
 import time
 import requests
-from flask import Flask, request, Response
-from pprint import pprint
 from pyngrok import ngrok 
 
 

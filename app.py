@@ -18,18 +18,14 @@ def incoming_notification():
 
     else:
         pprint(request.json)
-        event_type =  request.json["subscription"]["type"]
         try:
-            # modules.event_handler[event_type](request.json)
             event_handler(request)
         except Exception as ex:
             print(f"Something went wrong: \n {ex}")
         return Response(status=200)
            
-
 if __name__ == "__main__":
     try:
-        # threading.Thread(target=modules.ngrok_handler.start_ngrok).start()
         threading.Thread(target=modules.ngrok_handler.start_ngrok, 
                            args=(event_handler.subscriptions,)).start() 
         app.run()
