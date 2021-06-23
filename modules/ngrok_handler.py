@@ -1,18 +1,14 @@
 import os
 import time
 import requests
-from flask import Flask, request, Response
-from pprint import pprint
 from pyngrok import ngrok 
 
-from . import event_handler
 
-
-def start_ngrok():
+def start_ngrok(subs):
     # sleep to ensure flask server starts before making a request
     time.sleep(5)
     ngrok_url = init_ngrok()
-    create_eventhub_subscriptions(ngrok_url, list(event_handler.keys()))
+    create_eventhub_subscriptions(ngrok_url, subs)
 
 
 def init_ngrok(port=5000):
