@@ -1,4 +1,4 @@
-# ttv_bot
+# ttv_eventsub
 twitch.tv Flask application for interfacing with Twitch's EventSub API.
 
 This repositoy consists of three main processes:
