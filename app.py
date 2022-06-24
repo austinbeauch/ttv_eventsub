@@ -1,33 +1,38 @@
-import threading
-
+import os
 from pprint import pprint
-from flask import Flask, request, Response
+from twitchAPI import Twitch, EventSub
 
 import modules
 
-app = Flask(__name__)
 event_handler = modules.event_handler.Handler()
 
-@app.route('/', methods=['POST'])
-def incoming_notification():  
-    # if it's a callback from the server for authentication
-    if "challenge" in request.json:
-        challenge_type = request.json["subscription"]["type"]
-        print(f"Returning challenge for {challenge_type}")
-        return request.json["challenge"]
 
-    else:
-        pprint(request.json)
-        try:
-            event_handler(request)
-        except Exception as ex:
-            print(f"Something went wrong: \n {ex}")
-        return Response(status=200)
-           
+async def handle_event(data):
+    event_handler(data)
+
+
 if __name__ == "__main__":
+    PORT = 6001
+    TARGET_USERNAME = 'beauch30'
+    WEBHOOK_URL = modules.ngrok_handler.init_ngrok(PORT)
+    APP_ID = os.getenv("twitch_client_ID")
+    APP_SECRET = os.getenv("twitch_client_secret")
+
+    twitch = Twitch(APP_ID, APP_SECRET)
+    twitch.authenticate_app([])
+    uid = twitch.get_users(logins=[TARGET_USERNAME])
+    user_id = uid['data'][0]['id']
+
+    hook = EventSub(WEBHOOK_URL, APP_ID, PORT, twitch)
+    hook.unsubscribe_all()
+    hook.start()
+
+    print('Subscribing to hooks...')
+    hook.listen_channel_points_custom_reward_redemption_add(user_id, handle_event)
+
     try:
-        threading.Thread(target=modules.ngrok_handler.start_ngrok, 
-                           args=(event_handler.subscriptions,)).start() 
-        app.run()
+        input('press Enter to shut down...')
     finally:
-        modules.ngrok_handler.eventhub_unsubscribe()
+        hook.stop()
+    print('done')
+

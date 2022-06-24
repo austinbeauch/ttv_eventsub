@@ -16,7 +16,7 @@ class Handler:
         self.handle_request(request)
 
     def handle_request(self, request):
-        event_type = request.json["subscription"]["type"]
+        event_type = request["subscription"]["type"]
 
         if event_type == self.CHANNEL_POINTS:
             self.channel_points(request)
@@ -28,7 +28,7 @@ class Handler:
             self.bridge.blink()
 
     def channel_points(self, request):
-        reward = request.json['event']["reward"]["title"]
+        reward = request['event']["reward"]["title"]
         
         if reward.lower() in self.HUES:
             hue = self.HUES[reward.lower()]
