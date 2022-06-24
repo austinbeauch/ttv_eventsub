@@ -3,7 +3,7 @@ from phue import Bridge as HueBridge
 
 
 class Bridge:
-    bridge_ip = '192.168.1.64'
+    bridge_ip = '192.168.1.65'
 
     def __init__(self):
         self.bridge = HueBridge(self.bridge_ip)
