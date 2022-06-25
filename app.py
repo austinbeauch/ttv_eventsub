@@ -4,7 +4,9 @@ from twitchAPI import Twitch, EventSub
 
 import modules
 
-event_handler = modules.event_handler.Handler()
+
+# specify a group to restrict colour changes to one area
+event_handler = modules.event_handler.Handler(group=2)
 
 
 async def handle_event(data):
@@ -28,11 +30,14 @@ if __name__ == "__main__":
     hook.start()
 
     print('Subscribing to hooks...')
-    hook.listen_channel_points_custom_reward_redemption_add(user_id, handle_event)
+    hook.listen_channel_points_custom_reward_redemption_add(user_id, event_handler.handle_request)
+    hook.listen_channel_follow(user_id, event_handler.handle_request)
+    hook.listen_channel_subscribe(user_id, event_handler.handle_request)
 
     try:
         input('press Enter to shut down...')
     finally:
         hook.stop()
+
     print('done')
 

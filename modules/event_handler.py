@@ -8,29 +8,27 @@ class Handler:
     HUES = {'red': 0, 'yellow': 10000, 'green': 20000, 'cyan': 35000, 
             'blue': 45000, 'purple': 49152, 'pink': 57500}
 
-    def __init__(self):
-        self.bridge = bridge_handler.Bridge()
+    def __init__(self, group=None):
+        self.bridge = bridge_handler.Bridge(group)
         self.subscriptions = [self.FOLLOW, self.SUB, self.CHANNEL_POINTS]
 
     def __call__(self, request):
         self.handle_request(request)
 
-    def handle_request(self, request):
+    async def handle_request(self, request):
         event_type = request["subscription"]["type"]
 
         if event_type == self.CHANNEL_POINTS:
-            self.channel_points(request)
+            await self.channel_points(request)
 
-        elif event_type == self.FOLLOW:
-            self.bridge.blink()
+        elif event_type == self.FOLLOW or event_type == self.SUB:
+            await self.bridge.blink()
 
-        elif event_type == self.SUB:
-            self.bridge.blink()
 
-    def channel_points(self, request):
-        reward = request['event']["reward"]["title"]
-        
-        if reward.lower() in self.HUES:
+    async def channel_points(self, request):
+        reward = request['event']["reward"]["title"].lower()
+
+        if reward in self.HUES:
             hue = self.HUES[reward.lower()]
             self.bridge.set_lights(hue=hue, on=True) 
         

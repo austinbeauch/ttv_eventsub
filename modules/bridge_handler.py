@@ -5,17 +5,27 @@ from phue import Bridge as HueBridge
 class Bridge:
     bridge_ip = '192.168.1.65'
 
-    def __init__(self):
+    def __init__(self, group=None):
         self.bridge = HueBridge(self.bridge_ip)
         self.bridge.get_api()
         self.names = [i for i in self.bridge.get_light_objects('name')]
         self.lights = self.bridge.get_light_objects('name')
-        self.light_ids = list(self.bridge.get_light_objects('id').keys())
+        self.group = group
+
+        print("Available groups:")
+        for key, val in self.bridge.get_group().items():
+            print(f"Group ID: {key}, name: {val['name']}")
+
+        if group:
+            self.light_ids = [int(i) for i in self.bridge.get_group()[str(group)]["lights"]]
+            print(f"Using group {group}, lights {self.light_ids}")
+        else:
+            self.light_ids = list(self.bridge.get_light_objects('id').keys())
         
         # grab all current scene names
         self.name_scene_dict = {}
         for key in self.get_scene_ids():
-            name = self.get_scene_ids()[key]["name"]
+            name = self.get_scene_ids()[key]["name"].lower()
             self.name_scene_dict[name] = key
 
     def all_on(self):
@@ -36,8 +46,8 @@ class Bridge:
     def get_scene_ids(self):
         return self.bridge.get_scene()
 
-    def set_scene(self, scene_id, group=1):
-        self.bridge.activate_scene(group, scene_id)
+    def set_scene(self, scene_id):
+        self.bridge.activate_scene(self.group if self.group is not None else 1, scene_id)
         
     def set_lights(self, **kwargs):
         """
@@ -51,7 +61,7 @@ class Bridge:
         """
         self.bridge.set_group(group, setting, hue)
         
-    def blink(self, timer=3, transition=1):
+    async def blink(self, timer=3, transition=1):
         start = time.time()
         switch = True
         while time.time() - start < timer:
